@@ -39,7 +39,7 @@ public class FilesServiceImpl implements FilesService {
                 .storageFileName(storageFileName)
                 .size(file.getSize())
                 .type(file.getContentType())
-                .url(fileStoragePath + "\\" + storageFileName)
+                .url(fileStoragePath + File.separator + storageFileName)
                 .build();
 
 
@@ -53,6 +53,7 @@ public class FilesServiceImpl implements FilesService {
 
         return fileInfo;
     }
+
 
 
     @Override
@@ -70,7 +71,7 @@ public class FilesServiceImpl implements FilesService {
 
     @Override
     public File getFileByStorageName(String storageFileName) {
-        File result = new File(storageFileName + File.separator + storageFileName);
+        File result = new File(fileStoragePath + File.separator + storageFileName);
         return result;
     }
 

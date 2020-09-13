@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.hack.operator.dto.TroubleDto;
 import ru.hack.operator.models.Trouble;
+import ru.hack.operator.models.User;
 import ru.hack.operator.repositories.TroubleRepository;
+import ru.hack.operator.repositories.UserRepository;
 import ru.hack.operator.services.TroubleService;
 
 import javax.transaction.Transactional;
@@ -17,6 +19,9 @@ public class TroubleServiceImpl implements TroubleService {
     @Autowired
     private TroubleRepository troubleRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public List<TroubleDto> findNotDone() {
         return TroubleDto.from(troubleRepository.findAllToDo());
@@ -24,12 +29,17 @@ public class TroubleServiceImpl implements TroubleService {
 
     @Override
     @Transactional
-    public void changeStatus(Long troubleId, String newStatus) {
+    public void changeStatus(Long troubleId, String newStatus, String username) {
+        Optional<User> userOptional = userRepository.findOneByUsername(username);
+
         Optional<Trouble> troubleOptional = troubleRepository.findById(troubleId);
         if (troubleOptional.isPresent()) {
+
             if (Arrays.stream(Trouble.Status.values())
-                    .anyMatch(status -> status.toString().equals(newStatus)))
+                    .anyMatch(status -> status.toString().equals(newStatus))) {
                 troubleOptional.get().setStatus(Trouble.Status.valueOf(newStatus));
+                userOptional.ifPresent(user -> troubleOptional.get().setUser(user));
+            }
         }
     }
 }

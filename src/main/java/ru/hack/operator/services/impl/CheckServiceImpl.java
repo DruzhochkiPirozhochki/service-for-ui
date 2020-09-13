@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.hack.operator.models.Image;
 import ru.hack.operator.models.Trouble;
+import ru.hack.operator.repositories.TroubleRepository;
 import ru.hack.operator.services.CheckService;
 import ru.hack.operator.services.FilesService;
 
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -31,7 +33,10 @@ public class CheckServiceImpl implements CheckService {
     @Autowired
     private FilesService filesService;
 
+    @Autowired
+    private TroubleRepository troubleRepository;
 
+    @Transactional
     @SneakyThrows
     @Override
     public void sendToCheck(Image image) {
@@ -57,28 +62,28 @@ public class CheckServiceImpl implements CheckService {
             writer.append("Content-Disposition: form-data; name=\"textFile\"; filename=\"").append(defaultCharset().name()).append("\"").append(CRLF);
             writer.append("Content-Type: text/plain; charset=").append(String.valueOf(defaultCharset())).append(CRLF); // Text file itself must be saved in this charset!
             writer.append(CRLF).flush();
-            Files.copy(file.toPath(), output);
             output.flush(); // Important before continuing with writer!
+            Files.copy(file.toPath(), output);
             writer.append(CRLF).flush();
             writer.append("--").append(boundary).append("--").append(CRLF).flush();
         }
 
         // Request is lazily fired whenever you need to obtain information about response.
-        int responseCode = ((HttpURLConnection) connection).getResponseCode();
-        if (responseCode != 200) {
-            List<String> response = (List<String>) ((HttpURLConnection) connection).getContent();
-            image.setStatus(Image.Status.TROUBLED);
-            Trouble trouble = Trouble.builder()
-                    .image(image)
-                    .status(Trouble.Status.TO_DO)
-                    .types(response.stream()
-                            .map(Trouble.Type::valueOf) //TODO : согласовать ответы
-                            .collect(Collectors.toList()))
-                    .build();
-        } else {
-            image.setStatus(Image.Status.GOOD);
-        }
-        System.out.println(responseCode); // Should be 200
+//        int responseCode = ((HttpURLConnection) connection).getResponseCode();
+//        if (responseCode != 200) {
+//            List<String> response = (List<String>) ((HttpURLConnection) connection).getContent();
+//            image.setStatus(Image.Status.TROUBLED);
+//            Trouble trouble = Trouble.builder()
+//                    .image(image)
+//                    .status(Trouble.Status.TO_DO)
+//                    .types(response.stream()
+//                            .map(Trouble.Type::valueOf)
+//                            .collect(Collectors.toList()))
+//                    .build();
+//            troubleRepository.save(trouble);
+//        } else {
+//            image.setStatus(Image.Status.GOOD);
+//        }
 
     }
 }

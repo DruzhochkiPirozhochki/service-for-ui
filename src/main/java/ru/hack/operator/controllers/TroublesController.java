@@ -3,17 +3,16 @@ package ru.hack.operator.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 import ru.hack.operator.dto.TroubleDto;
 import ru.hack.operator.services.TroubleService;
 
+import java.security.Principal;
 import java.util.List;
 
-@Controller
+@RestController
 public class TroublesController {
 
     @Autowired
@@ -26,10 +25,13 @@ public class TroublesController {
         return ResponseEntity.ok(troubles);
     }
 
-    // TODO : проверить ето
+    // TODO : прикрутить свагер  документацию немного дописать
+
     @PostMapping("/trouble/{trouble-id}")
     @PreAuthorize("isAuthenticated()")
-    public void changeStatus(@PathVariable Long troubleId, @RequestParam String newStatus ) {
-        troubleService.changeStatus(troubleId, newStatus);
+    public void changeStatus(@PathVariable("trouble-id") Long troubleId,
+                             @RequestBody String newStatus) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        troubleService.changeStatus(troubleId, newStatus, authentication.getName());
     }
 }

@@ -7,5 +7,5 @@ import java.util.List;
 public interface TroubleService {
     List<TroubleDto> findNotDone();
 
-    void changeStatus(Long troubleId, String newStatus);
+    void changeStatus(Long troubleId, String newStatus, String username);
 }

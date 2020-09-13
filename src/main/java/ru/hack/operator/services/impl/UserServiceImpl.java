@@ -14,6 +14,7 @@ import ru.hack.operator.repositories.UserRepository;
 import ru.hack.operator.services.UserService;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -56,6 +57,7 @@ public class UserServiceImpl implements UserService {
                 .email(signUpDto.getEmail())
                 .username(signUpDto.getUsername())
                 .hashPassword(passwordEncoder.encode(signUpDto.getPassword()))
+                .createdAt(LocalDateTime.now())
                 .build();
 
         userRepository.save(user);
